@@ -1,0 +1,40 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(cuid())
+  username     String         @unique
+  passwordHash String         @map("password_hash")
+  role         Role           @default(TRAVELER)
+  createdAt    DateTime       @default(now()) @map("created_at")
+  entries      JournalEntry[]
+
+  @@map("users")
+}
+
+model JournalEntry {
+  id          String   @id @default(cuid())
+  dayNumber   Int      @unique @map("day_number")
+  tripDate    DateTime @map("trip_date")
+  title       String
+  description String
+  imageUrl    String   @map("image_url")
+  uploadedAt  DateTime @default(now()) @map("uploaded_at")
+  createdBy   String   @map("created_by")
+  user        User     @relation(fields: [createdBy], references: [id])
+
+  @@map("journal_entries")
+}
+
+enum Role {
+  TRAVELER
+  ADMIN
+}
